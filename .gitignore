@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+env/
+*.sqlite3
+*.db
+migrations/
+
+# Django
+*.log
+local_settings.py
+media/
+static/
+staticfiles/
+
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+yarn.lock
+
+# React
+build/
+dist/
+*.js.map
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Backend specific
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/db.sqlite3
+
+# Frontend specific
+frontend/node_modules/
+frontend/build/
+frontend/dist/
