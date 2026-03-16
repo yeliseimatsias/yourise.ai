@@ -1,5 +1,5 @@
 from docx import Document
-from base_parser import BaseParser
+from .base_parser import BaseParser
 import re
 
 

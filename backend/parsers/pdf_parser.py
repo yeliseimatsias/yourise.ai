@@ -1,5 +1,5 @@
 import pdfplumber
-from base_parser import BaseParser
+from .base_parser import BaseParser
 
 class PDFParser(BaseParser):
     """Парсер PDF-документов"""
