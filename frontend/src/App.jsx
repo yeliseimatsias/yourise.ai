@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom';
 
+import LoadDocs from './pages/LoadDocs';
+import Comparison from './pages/Comparison';
+import Export from './pages/Export';
+
 function App() {
 
   return (
-    <h1>
-      Hello world
-    </h1>
+    <Routes>
+      <Route path='/' element={<LoadDocs />} />
+      <Route path='/comp' element = {<Comparison />} />
+      <Route path='/export' element = {<Export />} />
+    </Routes>
   )
 }
 
