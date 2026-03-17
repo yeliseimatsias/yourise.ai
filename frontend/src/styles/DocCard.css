@@ -1,0 +1,57 @@
+/* Основная карточка документа (белая область) */
+.doc-card {
+  background-color: #ffffff;           /* как .file-upload-area */
+  border-radius: 0.5rem;               /* как .file-upload-area */
+  padding: 2rem;                        /* внутренние отступы (можно увеличить до 4rem, но для текста лучше 2rem) */
+  max-width: 600px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* лёгкая тень, опционально */
+}
+
+/* Заголовок редакции (Старая редакция / Новая редакция) */
+.doc-card__main-title {
+  font-size: 1.25rem;                   /* как .file-upload-title */
+  color: #111827;                       /* тёмно-серый */
+  margin-bottom: 2rem;                   /* такой же отступ снизу */
+  font-weight: normal;
+}
+
+/* Контейнер статьи */
+.doc-card__article {
+  margin-bottom: 1.5rem;
+}
+
+/* Заголовок статьи (например, "Статья 112.") */
+.doc-card__article-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Блок с параграфами (пунктами) */
+.doc-card__paragraphs {
+  margin-left: 0.5rem;                   /* лёгкий отступ для иерархии */
+}
+
+/* Отдельный параграф (пункт статьи) */
+.doc-card__paragraph {
+  font-size: 0.875rem;                   /* как .file-upload-text */
+  color: #111827;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+
+/* Разделитель между статьями */
+.doc-card__separator {
+  border: 0;
+  border-top: 1px solid #e5e7eb;          /* очень светлый серый */
+  margin: 1.5rem 0;
+}
+
+/* Стиль для пустой статьи (без параграфов) – скрываем возможный лишний элемент */
+.doc-card__empty {
+  display: none;
+}

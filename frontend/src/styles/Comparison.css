@@ -1,0 +1,13 @@
+
+.compare_docs__title {
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.compare_docs__body {
+    display: flex;
+}
+
+.doc-card:not(:last-child) {
+    margin-right: 30px;
+}

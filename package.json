@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "docx-preview": "^0.3.7",
     "react-router-dom": "^7.13.1"
   }
 }

@@ -1,9 +1,26 @@
-const Header = () => {
-    return (
-        <header>
-            123
-        </header>
-    )
-}
+import Logo from '../components/Logo';
+import Navigation from '../components/Navigation';
+import '../styles/Header.css';
 
-export default Header 
+const Header = ({ items: customItems }) => {
+    // Массив по умолчанию, если не передали свой
+    //{ path: '/', label: 'Загрузить файлы' },
+    const defaultNavItems = [
+        
+        { path: '/comp', label: 'Сравнение' },
+        { path: '/export', label: 'Экспорт отчета' },
+    ];
+
+    const navItems = customItems || defaultNavItems;
+
+    return (
+        <header className="header">
+            <div className="header__container container">
+                <Logo className="header__logo" />
+                <Navigation items={navItems} className="header__navigation" />
+            </div>
+        </header>
+    );
+};
+
+export default Header;
