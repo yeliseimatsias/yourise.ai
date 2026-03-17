@@ -8,34 +8,38 @@ class BaseParser(ABC):
         pass
 
     def detect_structure(self, text: str) -> list:
-        """Определение структуры документа по тексту"""
         lines = text.split('\n')
         elements = []
         current_element = None
 
         for line in lines:
             line = line.strip()
-            if not line:
-                continue
+            if not line: continue
 
             element_type, number, title = self._identify_element(line)
 
             if element_type:
                 if current_element:
+                    current_element['content'] = current_element['content'].strip()
                     elements.append(current_element)
 
+                # Теперь 'content' не пустой, а сразу получает текст заголовка (title)
+                # Это уберет "Статья 23", но оставит всё, что было написано после неё
                 current_element = {
                     'type': element_type,
                     'number': number,
                     'title': title,
-                    'content': line,
+                    'content': title if title else "",
                     'level': self._get_level(number),
                     'sequence': len(elements) + 1
                 }
             else:
                 if current_element:
-                    current_element['content'] += '\n' + line
+                    # Добавляем последующие строки к контенту
+                    sep = " " if current_element['content'] else ""
+                    current_element['content'] += sep + line
                 else:
+                    # Текст в самом начале документа
                     elements.append({
                         'type': 'text',
                         'number': None,
@@ -46,28 +50,23 @@ class BaseParser(ABC):
                     })
 
         if current_element:
+            current_element['content'] = current_element['content'].strip()
             elements.append(current_element)
-
         return elements
 
     def _identify_element(self, line: str) -> tuple:
-        """Определяет, является ли строка началом структурного элемента"""
-        # Статьи
-        article_match = re.search(r'^(Статья|СТАТЬЯ|Артыкул)\s+(\d+[а-я]?)\.?\s*(.*)', line, re.IGNORECASE)
+        article_match = re.search(r'^(?:\d+\.\s+)?(?:Статья|СТАТЬЯ)\s+(\d+[а-я]?)\.?\s*(.*)', line, re.IGNORECASE)
         if article_match:
-            return ('article', article_match.group(2), article_match.group(3))
+            return ('article', article_match.group(1), article_match.group(2))
 
-        # Главы и разделы
-        chapter_match = re.search(r'^(Глава|ГЛАВА|Раздел|РАЗДЕл)\s+([IVXLCDM\d]+)\.?\s*(.*)', line, re.IGNORECASE)
+        chapter_match = re.search(r'^(?:Глава|ГЛАВА|Раздел|РАЗДЕл)\s+([IVXLCDM\d]+)\.?\s*(.*)', line, re.IGNORECASE)
         if chapter_match:
-            return ('chapter', chapter_match.group(2), chapter_match.group(3))
+            return ('chapter', chapter_match.group(1), chapter_match.group(2))
 
-        # Подпункты
         subclause_match = re.search(r'^(\d+\.\d+)\.?\s+(.*)', line)
         if subclause_match:
             return ('subclause', subclause_match.group(1), subclause_match.group(2))
 
-        # Пункты
         clause_match = re.search(r'^(\d+)\.\s+(.*)', line)
         if clause_match:
             return ('clause', clause_match.group(1), clause_match.group(2))
