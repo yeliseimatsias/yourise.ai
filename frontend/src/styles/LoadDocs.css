@@ -1,0 +1,51 @@
+.LoadDocs {
+    width: 100%;
+    height: 100%;
+}
+
+.LoadDocs__container {
+    width: 100%;
+}
+
+.LoadDocs__logo {
+    margin-bottom: 30px;
+    display: block;
+}
+
+.LoadDocs__title {
+    margin-bottom: 40px;
+}
+
+
+.LoadDocs__body {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 106px;
+    margin-bottom: 50px;
+}
+
+.LoadDocs__areaforbtn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+
+.file-upload-container {
+    flex: 1 0 50%;
+    max-width: 50%;
+}
+
+.file-upload-container:not(:last-child) {
+    margin-right: 20px;
+}
+.file-upload-container:not(:first-child) {
+    margin-left: 20px;
+}
+
+@media (max-width: 920px)
+{
+    .LoadDocs__body {
+        padding: 0;
+    }
+}
