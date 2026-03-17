@@ -1,14 +1,42 @@
-from parsers import ParserFactory
-import json, os
+import os
+os.environ['HF_HOME'] = 'D:/huggingface_cache'
 
-file_path = '' #FILE PATH!!!
-extension = file_path.split('.')[-1]
+from embandding import DocumentProcessingPipeline
 
-parser = ParserFactory.get_parser(extension)
-document_json = parser.parse(file_path)
+# Ваш исходный словарь
+data = {
+    "filename": "trudovoy_kodeks_2026.docx",
+    "elements": [
+        {
+            "type": "article",
+            "number": "5",
+            "title": "Права и обязанности работника",
+            "content": "Работник имеет право на ежегодный оплачиваемый отпуск...",
+        },
+        {
+            "type": "clause",
+            "number": "5.1",
+            "title": None,
+            "content": "Отпуск предоставляется продолжительностью 24 календарных дня",
+        }
+    ]
+}
 
-output_json_path = os.path.splitext(file_path)[0] + ".json"
-with open(output_json_path, 'w', encoding='utf-8') as f:
-    json.dump(document_json, f, ensure_ascii=False, indent=4)
 
-print(document_json)
+def main():
+    pipeline = DocumentProcessingPipeline(chunk_size=250)
+    chunks, embeddings = pipeline.run(data)
+
+    # Результат, готовый к отправке в БД
+    print(f"Создано чанков: {len(chunks)}")
+    print(f"Создано векторов: {len(embeddings)}")
+
+    if chunks:
+        print("\nПример первого чанка:")
+        print(chunks[0]['text'])
+        print(f"Размерность вектора: {embeddings[0].shape}")  # Ожидаем (1024,)
+        print(f"Тип данных вектора: {type(embeddings[0])}")  # Ожидаем <class 'numpy.ndarray'>
+
+
+if __name__ == "__main__":
+    main()
