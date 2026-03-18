@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom';
+import { FileProvider } from './context/FileContext';
 
 import LoadDocs from './pages/LoadDocs';
 import Comparison from './pages/Comparison';
@@ -9,12 +10,14 @@ import TitlePage from './pages/TitlePage';
 function App() {
 
   return (
-    <Routes>
-      <Route path='/' element={<TitlePage/>} />
-      <Route path='/load' element={<LoadDocs/>} />
-      <Route path='/comp' element = {<Comparison />} />
-      <Route path='/export' element = {<Export />} />
-    </Routes>
+    <FileProvider>
+      <Routes>
+        <Route path='/' element={<TitlePage/>} />
+        <Route path='/load' element={<LoadDocs/>} />
+        <Route path='/comp' element = {<Comparison />} />
+        <Route path='/export' element = {<Export />} />
+      </Routes>
+    </FileProvider>
   )
 }
 

@@ -1,42 +1,44 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useFiles } from '../context/FileContext';
 import "../styles/LoadDocs.css";
 import Title from "../components/Title";
 import Button from "../components/Button";
 import FileUpload from "../components/FileUpload";
-import Logo from '../components/Logo';
 import Header from '../layouts/Header';
 
 const LoadDocs = () => {
   const navigate = useNavigate();
-  const [oldFile, setOldFile] = useState(null);
-  const [newFile, setNewFile] = useState(null);
+  const { setOldFile, setNewFile } = useFiles();
+  const [oldFileLocal, setOldFileLocal] = useState(null);
+  const [newFileLocal, setNewFileLocal] = useState(null);
 
   const handleCompare = () => {
-    if (!oldFile || !newFile) return; // дополнительная проверка
-    navigate('/comp', { state: { oldFile, newFile } });
+    if (!oldFileLocal || !newFileLocal) return;
+    // Сохраняем файлы в контекст
+    setOldFile(oldFileLocal);
+    setNewFile(newFileLocal);
+    navigate('/comp');
   };
 
-  const bothFilesSelected = oldFile && newFile;
+  const bothFilesSelected = oldFileLocal && newFileLocal;
 
   return (
     <>
       <Header items={[]}/>
-
       <div className="LoadDocs">
         <div className="LoadDocs__container container">
           <Title className="LoadDocs__title">Загрузите документы для сравнения</Title>
-          
           <div className="LoadDocs__body">
             <FileUpload 
               title="Старая редакция" 
-              file={oldFile}
-              onFileSelect={setOldFile}
+              file={oldFileLocal}
+              onFileSelect={setOldFileLocal}
             />
             <FileUpload 
               title="Новая редакция" 
-              file={newFile}
-              onFileSelect={setNewFile}
+              file={newFileLocal}
+              onFileSelect={setNewFileLocal}
             />
           </div>
           <div className="LoadDocs__areaforbtn">

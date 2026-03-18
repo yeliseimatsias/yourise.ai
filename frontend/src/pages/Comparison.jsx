@@ -1,17 +1,21 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import * as mammoth from 'mammoth';
+import { useFiles } from '../context/FileContext';
 import Header from '../layouts/Header';
 import Title from '../components/Title';
 import DocCard from '../components/DocCard';
 import "../styles/Comparison.css";
 
-import RiskInfoButton from '../layouts/RiskInfo';
-
 const mockJson = [
+  { line: 1, type: "unchanged" },
+  { line: 2, type: "yellow" },
   { line: 3, type: "red" },
-  { line: 5, type: "green"},
-  { line: 11, type: "yellow"}
+  { line: 4, type: "unchanged" },
+  { line: 5, type: "green" },
+  { line: 6, type: "yellow" },
+  { line: 7, type: "red" },
+  { line: 8, type: "green" }
 ];
 
 const readFileLines = async (file, typeResolver = () => 'unchanged') => {
@@ -29,9 +33,8 @@ const readFileLines = async (file, typeResolver = () => 'unchanged') => {
 };
 
 const Comparison = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { oldFile, newFile } = location.state || {};
+  const { oldFile, newFile } = useFiles();
 
   const [oldLines, setOldLines] = useState([]);
   const [newLines, setNewLines] = useState([]);
@@ -39,19 +42,22 @@ const Comparison = () => {
   const [error, setError] = useState({ old: '', new: '' });
 
   useEffect(() => {
+    if (!oldFile || !newFile) {
+      navigate('/');
+    }
+  }, [oldFile, newFile, navigate]);
+
+  // Загрузка старого файла
+  useEffect(() => {
     if (!oldFile) return;
     setLoading(prev => ({ ...prev, old: true }));
-    readFileLines(oldFile, (lineNumber) => {
-      const match = mockJson.find(item => item.line === lineNumber);
-      // Если строка есть в mockJson и её тип не "unchanged" — подсвечиваем серым
-      return match && match.type !== 'unchanged' ? 'gray' : 'unchanged';
-    })
+    readFileLines(oldFile, () => 'unchanged')
       .then(lines => setOldLines(lines))
       .catch(() => setError(prev => ({ ...prev, old: 'Ошибка чтения старого файла' })))
       .finally(() => setLoading(prev => ({ ...prev, old: false })));
   }, [oldFile]);
 
-  // Новая редакция – с подсветкой из mockJson
+  // Загрузка нового файла
   useEffect(() => {
     if (!newFile) return;
     setLoading(prev => ({ ...prev, new: true }));
@@ -68,7 +74,7 @@ const Comparison = () => {
     console.log('Клик по строке:', line);
   };
 
-  if (!oldFile || !newFile) return null;
+  if (!oldFile || !newFile) return null; // защита, но редирект уже должен сработать
 
   return (
     <>
@@ -95,7 +101,6 @@ const Comparison = () => {
             />
           </div>
         </div>
-        <RiskInfoButton />
       </section>
     </>
   );
