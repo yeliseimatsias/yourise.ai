@@ -1,5 +1,2 @@
 django
 djangorestframework
-pdfplumber==0.10.3
-python-docx==1.1.0
-pytest==8.0.0
