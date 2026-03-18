@@ -1,5 +1,5 @@
-from .chunker import DocumentChunker
+from .chunker import LawDocumentChunker
 from .embedder import E5Embedder
-from .pipeline import DocumentProcessingPipeline
+from .pipeline import AdminLawIngestionPipeline
 
-all = ["DocumentChunker", "E5Embedder", "DocumentProcessingPipeline"]
+all = ["LawDocumentChunker", "E5Embedder", "AdminLawIngestionPipeline"]
