@@ -6,19 +6,14 @@ import Title from '../components/Title';
 import DocCard from '../components/DocCard';
 import "../styles/Comparison.css";
 
-// Мок-данные: line — номер строки в новой редакции (1‑based)
+import RiskInfoButton from '../layouts/RiskInfo';
+
 const mockJson = [
-  { line: 1, type: "unchanged" }, // Статья 1. Основные положения
-  { line: 2, type: "yellow" },    // добавлено "и инноваций"
-  { line: 3, type: "red" },       // добавлено "включая иностранных лиц"
-  { line: 4, type: "unchanged" }, // Статья 2. Права и обязанности
-  { line: 5, type: "green" },     // добавлено "полной и достоверной"
-  { line: 6, type: "yellow" },    // добавлено "и предоставлять отчеты"
-  { line: 7, type: "red" },       // заменено на "административная ответственность"
-  { line: 8, type: "green" }      // новый пункт 4
+  { line: 3, type: "red" },
+  { line: 5, type: "green"},
+  { line: 11, type: "yellow"}
 ];
 
-// Универсальная функция чтения файла и обработки строк
 const readFileLines = async (file, typeResolver = () => 'unchanged') => {
   const arrayBuffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer });
@@ -29,9 +24,8 @@ const readFileLines = async (file, typeResolver = () => 'unchanged') => {
     .map((lineText, index) => ({
       text: lineText,
       originalIndex: index,
-      type: typeResolver(index + 1) // передаём номер строки (1‑based)
-    }))
-    .filter(line => line.text.trim() !== ''); // сразу отсеиваем пустые
+      type: typeResolver(index + 1)
+    }));
 };
 
 const Comparison = () => {
@@ -45,22 +39,19 @@ const Comparison = () => {
   const [error, setError] = useState({ old: '', new: '' });
 
   useEffect(() => {
-    if (!oldFile || !newFile) {
-      navigate('/');
-    }
-  }, [oldFile, newFile, navigate]);
-
-  // Загрузка старого файла (все строки без подсветки)
-  useEffect(() => {
     if (!oldFile) return;
     setLoading(prev => ({ ...prev, old: true }));
-    readFileLines(oldFile)
+    readFileLines(oldFile, (lineNumber) => {
+      const match = mockJson.find(item => item.line === lineNumber);
+      // Если строка есть в mockJson и её тип не "unchanged" — подсвечиваем серым
+      return match && match.type !== 'unchanged' ? 'gray' : 'unchanged';
+    })
       .then(lines => setOldLines(lines))
-      .catch(err => setError(prev => ({ ...prev, old: 'Ошибка чтения старого файла' })))
+      .catch(() => setError(prev => ({ ...prev, old: 'Ошибка чтения старого файла' })))
       .finally(() => setLoading(prev => ({ ...prev, old: false })));
   }, [oldFile]);
 
-  // Загрузка нового файла с применением мок‑разметки
+  // Новая редакция – с подсветкой из mockJson
   useEffect(() => {
     if (!newFile) return;
     setLoading(prev => ({ ...prev, new: true }));
@@ -69,7 +60,7 @@ const Comparison = () => {
       return match ? match.type : 'unchanged';
     })
       .then(lines => setNewLines(lines))
-      .catch(err => setError(prev => ({ ...prev, new: 'Ошибка чтения нового файла' })))
+      .catch(() => setError(prev => ({ ...prev, new: 'Ошибка чтения нового файла' })))
       .finally(() => setLoading(prev => ({ ...prev, new: false })));
   }, [newFile]);
 
@@ -104,6 +95,7 @@ const Comparison = () => {
             />
           </div>
         </div>
+        <RiskInfoButton />
       </section>
     </>
   );

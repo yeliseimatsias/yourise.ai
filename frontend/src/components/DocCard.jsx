@@ -5,6 +5,7 @@ const getColorClass = (type) => {
     case 'green': return 'highlight-green';
     case 'yellow': return 'highlight-yellow';
     case 'red': return 'highlight-red';
+    case 'gray': return 'highlight-gray';
     default: return '';
   }
 };

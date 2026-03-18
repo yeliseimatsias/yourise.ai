@@ -35,15 +35,6 @@
   position: relative;
 }
 
-.compare_docs__title::after {
-  content: '';
-  display: block;
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  margin: 16px auto 0;
-  border-radius: 2px;
-}
 
 .compare_docs__body {
   display: grid;
