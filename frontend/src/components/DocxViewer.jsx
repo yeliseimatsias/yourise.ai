@@ -1,23 +1,29 @@
-import { useEffect, useState } from 'react';
-import DocxViewer from './DocxViewer';
+import React, { useEffect, useRef } from 'react';
+import { renderAsync } from 'docx-preview';
 
-const MyComponent = () => {
-  const [file, setFile] = useState(null);
+const DocxViewer = ({ file }) => {
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    fetch('/sd.docx')
-      .then(res => res.blob())
-      .then(blob => {
-        // Превращаем Blob в File (если нужно имя)
-        const file = new File([blob], 'sd.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-        setFile(file);
-      })
-      .catch(console.error);
-  }, []);
+    if (file && containerRef.current) {
+      containerRef.current.innerHTML = '';
+      renderAsync(file, containerRef.current, null, {
+        className: 'docx-viewer',
+        inWrapper: false,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        ignoreFonts: false,
+        breakPages: true,
+        ignoreLastRenderedPageBreak: true,
+        renderHeaders: true,
+        renderFooters: true,
+        renderFootnotes: true,
+        renderEndnotes: true,
+      }).catch(console.error);
+    }
+  }, [file]);
 
-  return (
-    <div>
-      {file ? <DocxViewer file={file} /> : <p>Загрузка...</p>}
-    </div>
-  );
+  return <div ref={containerRef} className="docx-container" />;
 };
+
+export default DocxViewer;

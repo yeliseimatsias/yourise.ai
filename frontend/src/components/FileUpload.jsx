@@ -52,7 +52,7 @@ function FileUpload({ title = "Старая редакция", file, onFileSelec
       >
         <p className="file-upload-text">перетащите файл или</p>
 
-        <Button className="file-upload-button" onClick={handleButtonClick}>
+        <Button variant="blue" className="file-upload-button" onClick={handleButtonClick}>
           выберите
         </Button>
         

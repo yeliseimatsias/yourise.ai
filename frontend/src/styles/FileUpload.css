@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #d4d4d4;
+  background-color: #5BB2F4;
   padding: 2rem;
 }
 
@@ -10,7 +10,6 @@
   font-size: 1.25rem;
   margin-bottom: 2rem;
   color: #111827;
-  
 }
 
 .file-upload-area {
@@ -48,10 +47,6 @@
   margin-bottom: 1rem;
   transition: background-color 0.2s;
   
-}
-
-.file-upload-button:hover {
-  background-color: #d1d5db;
 }
 
 .file-upload-hint {

@@ -1,57 +1,127 @@
-/* Основная карточка документа (белая область) */
+/* Основная карточка документа */
 .doc-card {
-  background-color: #ffffff;           /* как .file-upload-area */
-  border-radius: 0.5rem;               /* как .file-upload-area */
-  padding: 2rem;                        /* внутренние отступы (можно увеличить до 4rem, но для текста лучше 2rem) */
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 2rem;
   max-width: 600px;
   width: 100%;
   box-sizing: border-box;
   font-family: sans-serif;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* лёгкая тень, опционально */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  max-height: 800px;
 }
 
-/* Заголовок редакции (Старая редакция / Новая редакция) */
+/* Заголовок редакции */
 .doc-card__main-title {
-  font-size: 1.25rem;                   /* как .file-upload-title */
-  color: #111827;                       /* тёмно-серый */
-  margin-bottom: 2rem;                   /* такой же отступ снизу */
+  font-size: 1.25rem;
+  color: #111827;
+  margin-bottom: 2rem;
   font-weight: normal;
 }
 
-/* Контейнер статьи */
-.doc-card__article {
-  margin-bottom: 1.5rem;
+/* Контейнер для строк с подсветкой */
+.doc-card__content {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 600px;
+  padding-right: 4px;
+  margin-bottom: 1rem;
 }
 
-/* Заголовок статьи (например, "Статья 112.") */
-.doc-card__article-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 0.75rem 0;
-}
-
-/* Блок с параграфами (пунктами) */
-.doc-card__paragraphs {
-  margin-left: 0.5rem;                   /* лёгкий отступ для иерархии */
-}
-
-/* Отдельный параграф (пункт статьи) */
-.doc-card__paragraph {
-  font-size: 0.875rem;                   /* как .file-upload-text */
+/* Отдельная строка */
+.doc-card__line {
+  font-size: 0.875rem;
   color: #111827;
   line-height: 1.6;
   margin: 0.5rem 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-/* Разделитель между статьями */
-.doc-card__separator {
-  border: 0;
-  border-top: 1px solid #e5e7eb;          /* очень светлый серый */
-  margin: 1.5rem 0;
+.doc-card__line:hover {
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
-/* Стиль для пустой статьи (без параграфов) – скрываем возможный лишний элемент */
-.doc-card__empty {
-  display: none;
+/* Подсветка для добавленных строк */
+.highlight-added {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.highlight-deleted {
+  background-color: #f8d7da;
+  color: #721c24;
+  text-decoration: line-through;
+}
+
+.highlight-modified {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Информация о файле (если контент ещё не загружен) */
+.doc-card__file-info {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+}
+
+.doc-card__file-info p {
+  margin: 0.5rem 0;
+}
+
+.doc-card__file-info p:first-child {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Состояния загрузки и ошибки */
+.doc-card__loading,
+.doc-card__error {
+  padding: 2rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+}
+
+.doc-card__loading {
+  background-color: #e6f0ff;
+  color: #1e40af;
+}
+
+.doc-card__error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.highlight-green {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.highlight-yellow {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.highlight-red {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.doc-card {
+  height: 100%;
 }

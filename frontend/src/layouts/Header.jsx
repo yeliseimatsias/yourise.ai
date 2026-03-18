@@ -3,8 +3,7 @@ import Navigation from '../components/Navigation';
 import '../styles/Header.css';
 
 const Header = ({ items: customItems }) => {
-    // Массив по умолчанию, если не передали свой
-    //{ path: '/', label: 'Загрузить файлы' },
+    
     const defaultNavItems = [
         
         { path: '/comp', label: 'Сравнение' },

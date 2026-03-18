@@ -1,6 +1,6 @@
 .header {
-    padding: 20px 0;
-    background-color: #D9D9D9;
+    padding: 15px 0;
+    background-color: #5BB2F4;
 }
 
 .header__container {
@@ -28,7 +28,13 @@
 }
 
 .navigation__link--active {
-   
   color: #007bff;         /* синий цвет */
- 
+}
+
+.navigation__list {
+  align-items: center;
+}
+
+.header__navigation {
+  display: flex;
 }

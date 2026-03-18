@@ -41,7 +41,7 @@ const LoadDocs = () => {
           </div>
           <div className="LoadDocs__areaforbtn">
             {bothFilesSelected && (
-              <Button onClick={handleCompare} variant="dark-gray" className="LoadDocs__button">
+              <Button onClick={handleCompare} variant="blue" className="LoadDocs__button">
                 Сравнить
               </Button>
             )}
