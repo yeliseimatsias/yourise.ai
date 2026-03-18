@@ -5,7 +5,7 @@ import '../styles/Header.css';
 const Header = ({ items: customItems }) => {
     
     const defaultNavItems = [
-        
+        { path: '/load', label: 'Загрузка' },
         { path: '/comp', label: 'Сравнение' },
         { path: '/export', label: 'Экспорт отчета' },
     ];

@@ -6,6 +6,8 @@ import Title from '../components/Title';
 import DocCard from '../components/DocCard';
 import { mockApiResponse } from '../mocks/mockApiResponse';
 import "../styles/Comparison.css";
+import WasIt from '../components/WasIt';
+import RiskInfoButton from '../layouts/RiskInfo';
 
 const Comparison = () => {
   const navigate = useNavigate();
@@ -97,6 +99,9 @@ const Comparison = () => {
           </div>
         </div>
       </section>
+      
+      <WasIt oldLines={oldLines} newLines={newLines} />
+      <RiskInfoButton />
 
       {/* Модальное окно (без изменений) */}
       {selectedLine && (

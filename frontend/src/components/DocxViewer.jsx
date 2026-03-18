@@ -11,7 +11,7 @@ const DocxViewer = ({ file }) => {
         className: 'docx-viewer',
         inWrapper: false,
         ignoreWidth: false,
-        ignoreHeight: false,
+        ignoreHeight: true,
         ignoreFonts: false,
         breakPages: true,
         ignoreLastRenderedPageBreak: true,

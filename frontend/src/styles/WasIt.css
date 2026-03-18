@@ -1,0 +1,108 @@
+
+.wasIt {
+  padding: 2rem 0;
+}
+
+.wasIt__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.wasIt__title {
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 2rem;
+  color: #1e293b;
+}
+
+.wasIt__empty {
+  text-align: center;
+  color: #64748b;
+  font-size: 1.2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.wasIt__table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.wasIt__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.wasIt__table th,
+.wasIt__table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+.wasIt__table th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.wasIt__table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Цвета для риска */
+.risk-зелёный {
+  color: #15803d;
+  font-weight: 600;
+}
+.risk-жёлтый {
+  color: #b45309;
+  font-weight: 600;
+}
+.risk-красный {
+  color: #b91c1c;
+  font-weight: 600;
+}
+.risk-фиолетовый {
+  color: #6b21a8;
+  font-weight: 600;
+}
+
+.details-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.details-button:hover {
+  background: #2563eb;
+  transform: scale(1.02);
+}
+
+.details-button:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .wasIt__table th,
+  .wasIt__table td {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+}
+ 
