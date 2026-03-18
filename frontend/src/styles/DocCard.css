@@ -131,3 +131,35 @@
   background-color: #e0e0e0;  /* светло-серый */
   color: #333333;
 }
+
+/* Фиолетовый для изменённых строк в старой редакции */
+.highlight-purple {
+  background-color: #e6d4ff;
+  color: #4a1b8c;
+}
+
+/* Подсветка при наведении (для синхронизации строк) */
+.doc-card__line--hover {
+  background-color: #f0f0f0 !important;  /* светло-серый, перебивает другие цвета */
+  outline: 2px solid #aaa;
+  z-index: 1;
+}
+
+.doc-card__line--empty {
+  height: 0;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.highlight-purple {
+  background-color: #e6d4ff;
+  color: #4a1b8c;
+}
+
+.doc-card__line--hover {
+  background-color: #f0f0f0 !important;
+  outline: 2px solid #aaa;
+  z-index: 1;
+}

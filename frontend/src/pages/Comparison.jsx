@@ -1,36 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import * as mammoth from 'mammoth';
 import { useFiles } from '../context/FileContext';
 import Header from '../layouts/Header';
 import Title from '../components/Title';
 import DocCard from '../components/DocCard';
+import { mockApiResponse } from '../mocks/mockApiResponse';
 import "../styles/Comparison.css";
-
-const mockJson = [
-  { line: 1, type: "unchanged" },
-  { line: 2, type: "yellow" },
-  { line: 3, type: "red" },
-  { line: 4, type: "unchanged" },
-  { line: 5, type: "green" },
-  { line: 6, type: "yellow" },
-  { line: 7, type: "red" },
-  { line: 8, type: "green" }
-];
-
-const readFileLines = async (file, typeResolver = () => 'unchanged') => {
-  const arrayBuffer = await file.arrayBuffer();
-  const result = await mammoth.extractRawText({ arrayBuffer });
-  const text = result.value;
-
-  return text
-    .split('\n')
-    .map((lineText, index) => ({
-      text: lineText,
-      originalIndex: index,
-      type: typeResolver(index + 1)
-    }));
-};
 
 const Comparison = () => {
   const navigate = useNavigate();
@@ -40,6 +15,8 @@ const Comparison = () => {
   const [newLines, setNewLines] = useState([]);
   const [loading, setLoading] = useState({ old: false, new: false });
   const [error, setError] = useState({ old: '', new: '' });
+  const [selectedLine, setSelectedLine] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState(null); // индекс строки, на которую наведён курсор
 
   useEffect(() => {
     if (!oldFile || !newFile) {
@@ -47,34 +24,48 @@ const Comparison = () => {
     }
   }, [oldFile, newFile, navigate]);
 
-  // Загрузка старого файла
+  // Симуляция загрузки старого файла (с фиолетовыми строками для изменённых)
   useEffect(() => {
     if (!oldFile) return;
     setLoading(prev => ({ ...prev, old: true }));
-    readFileLines(oldFile, () => 'unchanged')
-      .then(lines => setOldLines(lines))
-      .catch(() => setError(prev => ({ ...prev, old: 'Ошибка чтения старого файла' })))
-      .finally(() => setLoading(prev => ({ ...prev, old: false })));
+    
+    // Создаём копию mockApiResponse, но заменяем текст на "старый" (для демо просто копируем текст)
+    // и для строк, которые в mockApiResponse имеют риск (т.е. изменены), ставим risk: 'purple'
+    const oldLinesData = mockApiResponse.map(item => {
+      // Если у элемента есть риск (не null), значит строка была изменена в новой версии
+      const isChanged = item.risk !== null;
+      return {
+        text: item.text, // В реальности здесь должен быть текст старого файла
+        type: isChanged ? 'purple' : 'unchanged',
+        risk: isChanged ? 'purple' : null,
+        recommendation: null,
+        article: null
+      };
+    });
+
+    setTimeout(() => {
+      setOldLines(oldLinesData);
+      setLoading(prev => ({ ...prev, old: false }));
+    }, 500);
   }, [oldFile]);
 
-  // Загрузка нового файла
+  // Используем мок-данные для новой редакции
   useEffect(() => {
     if (!newFile) return;
     setLoading(prev => ({ ...prev, new: true }));
-    readFileLines(newFile, (lineNumber) => {
-      const match = mockJson.find(item => item.line === lineNumber);
-      return match ? match.type : 'unchanged';
-    })
-      .then(lines => setNewLines(lines))
-      .catch(() => setError(prev => ({ ...prev, new: 'Ошибка чтения нового файла' })))
-      .finally(() => setLoading(prev => ({ ...prev, new: false })));
+    setTimeout(() => {
+      setNewLines(mockApiResponse);
+      setLoading(prev => ({ ...prev, new: false }));
+    }, 500);
   }, [newFile]);
 
   const handleLineClick = (line) => {
-    console.log('Клик по строке:', line);
+    setSelectedLine(line);
   };
 
-  if (!oldFile || !newFile) return null; // защита, но редирект уже должен сработать
+  const closeModal = () => setSelectedLine(null);
+
+  if (!oldFile || !newFile) return null;
 
   return (
     <>
@@ -88,6 +79,8 @@ const Comparison = () => {
               file={oldFile}
               contentLines={oldLines}
               onLineClick={handleLineClick}
+              onLineHover={setHoveredIndex}   // передаём индекс при наведении
+              hoveredIndex={hoveredIndex}      // передаём текущий индекс для подсветки
               loading={loading.old}
               error={error.old}
             />
@@ -96,12 +89,36 @@ const Comparison = () => {
               file={newFile}
               contentLines={newLines}
               onLineClick={handleLineClick}
+              onLineHover={setHoveredIndex}
+              hoveredIndex={hoveredIndex}
               loading={loading.new}
               error={error.new}
             />
           </div>
         </div>
       </section>
+
+      {/* Модальное окно (без изменений) */}
+      {selectedLine && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3>Детали изменения</h3>
+            <p><strong>Текст:</strong> {selectedLine.text}</p>
+            {selectedLine.recommendation && (
+              <p><strong>Рекомендация:</strong> {selectedLine.recommendation}</p>
+            )}
+            {selectedLine.article && (
+              <p>
+                <strong>Статья:</strong> {selectedLine.article.title} —{' '}
+                <a href={selectedLine.article.url} target="_blank" rel="noopener noreferrer">
+                  открыть
+                </a>
+              </p>
+            )}
+            <button onClick={closeModal}>Закрыть</button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

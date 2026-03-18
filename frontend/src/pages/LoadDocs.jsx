@@ -6,6 +6,7 @@ import Title from "../components/Title";
 import Button from "../components/Button";
 import FileUpload from "../components/FileUpload";
 import Header from '../layouts/Header';
+import RiskInfo from '../layouts/RiskInfo';
 
 const LoadDocs = () => {
   const navigate = useNavigate();
