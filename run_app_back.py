@@ -165,3 +165,6 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"❌ Ошибка пользовательского пайплайна: {e}")
         return {"error": str(e)}
+
+if __name__ == "__main__":
+    admin_ingest_law(r"C:/Users/Lenovo/Downloads/H11300016_1357765200.pdf")
