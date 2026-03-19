@@ -7,16 +7,16 @@ import uuid
 import psycopg2
 
 # Импорты модулей парсинга
-from backend.parsers.factory import ParserFactory, UnsupportedFormatError
+from parsers.factory import ParserFactory, UnsupportedFormatError
 
 # Импорты модулей эмбеддинга и БД (админский пайплайн)
-from backend.embeddings.pipeline import AdminLawIngestionPipeline
+from embeddings.pipeline import AdminLawIngestionPipeline
 
 # Импорт генератора отчетов
-from backend.llm_validator.report import ReportGenerator
-from backend.llm_validator.config import Config
-from backend.llm_validator.core import LLMValidatorPipeline
-from backend.semantic_differ.analyzer import DocumentDiffer
+from llm_validator.report import ReportGenerator
+from llm_validator.config import Config
+from llm_validator.core import LLMValidatorPipeline
+from semantic_differ.analyzer import DocumentDiffer
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)

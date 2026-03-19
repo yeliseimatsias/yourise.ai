@@ -1,3 +1,5 @@
+# llm_validator/config.py
+
 import os
 from typing import Dict
 from dataclasses import dataclass, field
@@ -5,13 +7,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 @dataclass
 class Config:
-    deepseek_api_key = os.getenv('GROQ_API_KEY', '')
-    deepseek_base_url = "https://api.groq.com/openai/v1"
-    deepseek_model = "llama-3.3-70b-versatile" 
+    # 👇 ВАЖНО: Меняем настройки с облачных на локальные
+    deepseek_api_key = "ollama"                          # Можно любую строку
+    deepseek_base_url = "http://localhost:11434"         # Адрес твоего сервера Ollama
+    deepseek_model = "gpt-oss:120b-cloud"                     # Имя модели, которое ты скачал
 
+    # База данных (оставляем как есть)
     db_config: Dict[str, str] = field(default_factory=lambda: {
         'dbname': os.getenv('DB_NAME', 'lawyer_assistant'),
         'user': os.getenv('DB_USER', 'postgres'),
@@ -21,9 +24,9 @@ class Config:
     })
 
     temperature: float = 0.1
-    request_timeout: int = 45
+    request_timeout: int = 120          # Для локальной модели лучше увеличить таймаут
     embedder_model: str = "intfloat/multilingual-e5-large"
 
     def validate(self):
-        if not self.deepseek_api_key:
-            raise ValueError("API ключ DeepSeek (DEEPSEEK_API_KEY) не задан в .env файле!")
+        # Для Ollama проверка ключа не нужна
+        pass

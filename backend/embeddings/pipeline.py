@@ -5,8 +5,8 @@ from psycopg2.extras import execute_values
 import numpy as np
 from typing import List, Dict, Any, Tuple
 
-from backend.embeddings.chunker import LawDocumentChunker
-from backend.embeddings.embedder import E5Embedder
+from embeddings.chunker import LawDocumentChunker
+from embeddings.embedder import E5Embedder
 
 logger = logging.getLogger(__name__)
 

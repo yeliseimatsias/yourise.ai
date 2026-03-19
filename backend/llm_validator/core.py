@@ -11,7 +11,7 @@ from .clients import DeepSeekClient
 from .prompts import PromptBuilder
 from .db import ValidatorRepository
 
-from backend.embeddings.embedder import E5Embedder
+from embeddings.embedder import E5Embedder
 
 logger = logging.getLogger(__name__)
 

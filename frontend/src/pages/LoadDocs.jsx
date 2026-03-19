@@ -21,25 +21,25 @@ const LoadDocs = () => {
 
     setIsUploading(true);
     const formData = new FormData();
-    // Ключи 'old_doc' и 'new_doc' должны совпадать с ожиданиями Django
     formData.append('old_doc', oldFileLocal);
     formData.append('new_doc', newFileLocal);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/compare/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+  const response = await axios.post('http://127.0.0.1:8000/api/compare/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
 
-      // Сохраняем файлы и результат анализа (те самые 3 JSON)
-      setOldFile(oldFileLocal);
-      setNewFile(newFileLocal);
-      setAnalysisData(response.data); 
+  console.log("✅ Ответ от бэкенда:", response.data);   // 👈 ЭТО ДОБАВЬ
 
-      navigate('/comp');
-    } catch (error) {
-      console.error("Ошибка загрузки:", error);
-      alert("Не удалось связаться с сервером аналитики");
-    } finally {
+  setOldFile(oldFileLocal);
+  setNewFile(newFileLocal);
+  setAnalysisData(response.data);
+  navigate('/comp');
+} catch (error) {
+  console.error("❌ Ошибка загрузки:", error);
+  const errorMsg = error.response?.data?.error || "Не удалось связаться с сервером аналитики";
+  alert(`Ошибка: ${errorMsg}`);
+} finally {
       setIsUploading(false);
     }
   };
@@ -61,7 +61,7 @@ const LoadDocs = () => {
                 variant="blue" 
                 disabled={isUploading}
               >
-                {isUploading ? "Обработка..." : "Сравнить"}
+                {isUploading ? "Обработка и анализ..." : "Сравнить"}
               </Button>
             )}
           </div>

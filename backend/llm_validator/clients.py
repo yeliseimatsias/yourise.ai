@@ -19,7 +19,7 @@ class DeepSeekClient:
         }
         try:
             response = requests.post(
-                f"{self.base_url}/chat/completions", headers=self.headers, json=payload, timeout=self.timeout
+               f"{self.base_url}/v1/chat/completions", headers=self.headers, json=payload, timeout=self.timeout
             )
             response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"]
