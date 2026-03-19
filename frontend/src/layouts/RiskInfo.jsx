@@ -32,8 +32,8 @@ const RiskInfoButton = () => {
           <div className="popup" ref={popupRef}>
             <h3>Уровни риска</h3>
             <div className="risk-item">
-              <span className="color-box gray" />
-              <span><strong>Серый</strong> — Измененненая строка</span>
+              <span className="color-box purple" />
+              <span><strong>Фиолетовый</strong> — Измененненая строка</span>
             </div>
             <div className="risk-item">
               <span className="color-box green" />
