@@ -1,0 +1,99 @@
+.wasIt {
+    padding: 60px 0;
+    background: #f1f5f9;
+}
+
+.wasIt__title {
+  margin-bottom: 40px;
+}
+
+.wasIt__table-wrapper {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden; /* Чтобы скругления работали */
+    border: 1px solid #e2e8f0;
+}
+
+.wasIt__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    table-layout: fixed; /* Фиксируем ширину колонок */
+}
+
+.wasIt__table th {
+    background: #f8fafc;
+    padding: 16px;
+    text-align: left;
+    font-weight: 700;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+}
+
+.wasIt__table td {
+    padding: 16px;
+    vertical-align: top;
+    border-bottom: 1px solid #f1f5f9;
+    line-height: 1.5;
+}
+
+/* Стилизация текста */
+.wasIt__text-cell {
+    word-wrap: break-word;
+    color: #1e293b;
+}
+
+.wasIt__text-old {
+    color: #64748b;
+    font-style: italic;
+}
+
+/* Ссылка на статью */
+.wasIt__link {
+    display: inline-block;
+    color: #0009FF;
+    background: rgba(0, 9, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    border: 1px solid rgba(0, 9, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.wasIt__link:hover {
+    background: #0009FF;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Бейджи рисков */
+.wasIt__badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.risk-red { background: #fee2e2; color: #b91c1c; }
+.risk-yellow { background: #fef9c3; color: #a16207; }
+.risk-green { background: #dcfce7; color: #15803d; }
+.risk-purple { background: #f3e8ff; color: #7e22ce; }
+
+.wasIt__cell-center {
+    text-align: center;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.wasIt__recommendation {
+    font-size: 13px;
+    color: #475569;
+}

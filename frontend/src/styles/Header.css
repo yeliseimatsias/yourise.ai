@@ -1,0 +1,40 @@
+.header {
+    padding: 15px 0;
+    background-color: #5BB2F4;
+}
+
+.header__container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.navigation__list {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navigation__link {
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.navigation__link:hover {
+  color: #007bff;
+}
+
+.navigation__link--active {
+  color: #007bff;         /* синий цвет */
+}
+
+.navigation__list {
+  align-items: center;
+}
+
+.header__navigation {
+  display: flex;
+}
