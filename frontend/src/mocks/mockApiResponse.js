@@ -21,7 +21,7 @@ export const mockApiResponse = [
     article: null
   },
   {
-    text: "", // пустая строка
+    text: "",
     type: "unchanged",
     risk: null,
     recommendation: null,
