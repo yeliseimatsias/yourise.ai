@@ -1,18 +1,24 @@
 import api from './instance';
 
 export const docApi = {
-  // Отправка файлов на сравнение
   compareDocuments: async (oldFile, newFile) => {
     const formData = new FormData();
     formData.append('old_file', oldFile);
     formData.append('new_file', newFile);
 
-    const response = await api.post('/compare/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return response.data;
-  },
-  
-  // Получение истории (если нужно)
-  getHistory: () => api.get('/history/').then(res => res.data),
+    // Предположим, бэк возвращает массив из 3-х ответов 
+    // или у тебя 3 разных эндпоинта. 
+    // Если эндпоинт один, но он шлет массив:
+    const response = await api.post('/compare/', formData);
+    
+    // Допустим, response.data выглядит как [oldDocJson, newDocJson, analysisJson]
+    const [oldDoc, newDoc, analysis] = response.data;
+
+    // Собираем их в ту структуру, которую ждет наш парсер
+    return {
+      old_document: oldDoc,
+      new_document: newDoc,
+      analysis: analysis
+    };
+  }
 };

@@ -9,6 +9,7 @@ import { parseApiResponse } from '../utils/parseApiResponse';
 import "../styles/Comparison.css";
 import WasIt from '../components/WasIt';
 import RiskInfoButton from '../layouts/RiskInfo';
+import LineDetailsModal from '../components/LineDetailsModal'; // импортируем новый компонент
 
 const Comparison = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const Comparison = () => {
 
     setLoading({ old: true, new: true });
 
+    // Имитация запроса к API
     setTimeout(() => {
       try {
         const parsed = parseApiResponse(MOCK_API_RESPONSE);
@@ -89,25 +91,8 @@ const Comparison = () => {
 
       <WasIt changes={changes} />
       <RiskInfoButton />
-
-      {selectedLine && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3>Детали изменения</h3>
-            <p><strong>Текст:</strong> {selectedLine.text}</p>
-            {selectedLine.explanation && (
-              <p><strong>Пояснение:</strong> {selectedLine.explanation}</p>
-            )}
-            {selectedLine.recommendation && (
-              <p><strong>Рекомендация:</strong> {selectedLine.recommendation}</p>
-            )}
-            {selectedLine.elementNumber && (
-              <p><strong>Элемент:</strong> {selectedLine.elementNumber}</p>
-            )}
-            <button onClick={closeModal}>Закрыть</button>
-          </div>
-        </div>
-      )}
+      
+      <LineDetailsModal line={selectedLine} onClose={closeModal} />
     </>
   );
 };
