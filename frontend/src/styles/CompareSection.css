@@ -1,0 +1,19 @@
+
+.compare_docs__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.compare_docs__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .compare_docs__body {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

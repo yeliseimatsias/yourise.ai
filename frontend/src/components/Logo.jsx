@@ -6,7 +6,7 @@ const Logo = (props) => {
     return (
         <a href="/" className="logo">
             <img className="logo__img" src={logoimg} alt="" />
-            <div className="logo__text">LEXRAYAI</div>
+            <div className="logo__text">LexRay AI</div>
         </a>
     )
 }

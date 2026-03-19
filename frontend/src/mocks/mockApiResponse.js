@@ -15,14 +15,10 @@ export const mockApiResponse = [
   },
   {
     text: "2. Действие настоящего Закона распространяется на всех участников эксперимента, включая иностранных лиц.",
-    type: "modified",
-    risk: "red",
-    recommendation: "Распространение на иностранных лиц требует проверки международных соглашений.",
-    article: {
-      id: "1",
-      title: "Статья 1",
-      url: "/law/article/1"
-    }
+    type: "unchanged",
+    risk: null,
+    recommendation: null,
+    article: null
   },
   {
     text: "", // пустая строка

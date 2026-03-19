@@ -1,114 +1,154 @@
-
-
-
-.compare_docs__title {
-    margin-top: 30px;
-    margin-bottom: 40px;
+:root {
+    --risk-purple: #8b5cf6;
+    --risk-purple-light: rgba(139, 92, 246, 0.1);
+    --hover-bg: #f1f5f9;
+    --border-color: #e2e8f0;
 }
 
-.compare_docs__body {
-    display: flex;
-}
-
-.doc-card:not(:last-child) {
-    margin-right: 30px;
-}
-
-/* Общие стили для страницы сравнения */
 .compare_docs {
-  padding: 40px 0;
-  min-height: 70vh;
-  background-color: #D3F2FF;
+    padding: 60px 0 100px 0;
+    background: #f8fafc;
+    min-height: 100vh;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .compare_docs__container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 20px;
+    max-width: 1400px; /* Расширяем для удобства работы с двумя текстами */
+    margin: 0 auto;
 }
 
 .compare_docs__title {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 40px;
-  text-align: center;
-  letter-spacing: -0.02em;
-  position: relative;
+    margin-bottom: 40px;
+    text-align: center;
+    font-weight: 850;
+    color: #0f172a;
 }
-
 
 .compare_docs__body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 40px;
-}
-
-@media (max-width: 768px) {
-  .compare_docs__body {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Четкое деление 50/50 */
     gap: 20px;
-  }
+    align-items: start;
 }
 
-/* Стили для блока загрузки (если используется) – можно добавить позже */
+/* Стилизация DocCard внутри сравнения */
+.doc-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
 
+/* Стили строк (линий текста) */
+.doc-line {
+    padding: 8px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    margin: 2px 0;
+}
+
+/* Синхронизированная подсветка при наведении */
+.doc-line--hovered {
+    background-color: var(--hover-bg);
+    border-left-color: #cbd5e1;
+}
+
+/* Выделение измененных строк (purple из твоего кода) */
+.doc-line--purple {
+    background-color: var(--risk-purple-light);
+    border-left-color: var(--risk-purple);
+}
+
+.doc-line--purple:hover {
+    background-color: rgba(139, 92, 246, 0.2);
+}
+
+/* Модальное окно (Glassmorphism) */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    background: white;
+    padding: 32px;
+    border-radius: 24px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
 }
 
 .modal-content h3 {
-  margin-top: 0;
-  color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: var(--risk-purple);
+    font-weight: 800;
 }
 
 .modal-content p {
-  margin: 12px 0;
-  line-height: 1.5;
+    margin-bottom: 16px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.modal-content strong {
+    color: #1e293b;
 }
 
 .modal-content a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.modal-content a:hover {
-  text-decoration: underline;
+    color: #0009FF;
+    text-decoration: underline;
+    font-weight: 600;
 }
 
 .modal-content button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 16px;
-  width: 100%;
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
 .modal-content button:hover {
-  background-color: #5a6268;
+    background: #e2e8f0;
+}
+
+/* Анимации */
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.9) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Адаптив */
+@media (max-width: 1024px) {
+    .compare_docs__body {
+        grid-template-columns: 1fr; /* На планшетах в одну колонку */
+    }
 }

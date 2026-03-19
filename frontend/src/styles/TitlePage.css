@@ -1,33 +1,118 @@
+:root {
+    --lex-blue-dark: #0009FF;
+    --lex-blue-bright: #4D54FF;
+}
+
 .TitlePage {
     width: 100%;
-    height: 100%;
-
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    
+    justify-content: center;
     text-align: center;
-    background-image: url('../assets/bg.jpg');
+    
+    /* Делаем фон четким и ярким */
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), /* Почти прозрачный слой */
+        url('../assets/bg.jpg');
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
 
-    padding: 15vh 0 0 0;
-    opacity: 0.8;
+    padding: 20px;
+    box-sizing: border-box;
+    /* Убрали общую opacity, чтобы текст был на 100% четким */
 }
 
 .TitlePage__title {
-    font-size: 96px;
+    font-size: clamp(40px, 8vw, 96px);
     margin-bottom: 30px;
     font-weight: 900;
-    color: #0009FF;
-
-    line-height: 0.9;
+    line-height: 0.95;
+    color: var(--lex-blue-dark);
+    
+    /* Тень, чтобы текст читался на любом фоне */
+    text-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
+    
+    /* Анимация появления */
+    animation: titleReveal 1s ease-out forwards;
 }
 
 .TitlePage__text {
-    margin-bottom: 80px;
-    font-size: 24px;
-    color: #0D00FF;
-    max-width: 1000px;
+    margin-bottom: 60px;
+    font-size: clamp(16px, 2vw, 24px);
+    color: #1a1a1a; /* Сделали чуть темнее для контраста */
+    max-width: 900px;
+    line-height: 1.5;
+    font-weight: 500;
+    
+    /* Белая подложка-эффект (стеклянная пыль) под текстом, если фон очень пестрый */
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px); /* Слегка размоет фон только ПОД текстом */
+    padding: 20px;
+    border-radius: 16px;
+    
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out 0.4s forwards;
+}
+
+.TitlePage__button {
+    padding: 18px 50px !important;
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    
+    /* Кнопку делаем контрастной */
+    background-color: var(--lex-blue-dark) !important;
+    color: white !important;
+    box-shadow: 0 8px 25px rgba(0, 9, 255, 0.4);
+    
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out 0.8s forwards;
+    transition: all 0.3s ease !important;
+}
+
+.TitlePage__button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 9, 255, 0.5);
+    filter: brightness(1.2);
+}
+
+/* Анимации */
+@keyframes titleReveal {
+    from { 
+        opacity: 0; 
+        transform: scale(0.9) translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1) translateY(0); 
+    }
+}
+
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    .TitlePage {
+        padding-top: 40px;
+    }
+    .TitlePage__title {
+        font-size: 42px;
+    }
+    .TitlePage__text {
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.5); /* Больше контраста на мобилках */
+    }
 }

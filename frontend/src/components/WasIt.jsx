@@ -21,19 +21,17 @@ const WasIt = ({ oldLines, newLines }) => {
     purple: { label: "ФИОЛЕТОВЫЙ", class: "risk-фиолетовый" },
   };
 
-  // 3. Фильтруем только те строки, которые были изменены или добавлены
+  // 3. Фильтруем только те строки, которые имеют риск (изменения)
   const changedData = newLines
     .map((newLine, index) => {
-      // В вашем JSON изменения помечены типом 'modified' или 'added', либо наличием risk
       if (newLine.risk !== null) {
         return {
-          пункт: index + 1,
+          номерСтроки: index + 1,
           было: oldLines && oldLines[index] ? oldLines[index].text : "—",
           стало: newLine.text,
           статья: newLine.article?.title || "—",
-          рискKey: newLine.risk, // например 'red'
+          рискKey: newLine.risk,
           рекомендация: newLine.recommendation || "—",
-          raw: newLine
         };
       }
       return null;
@@ -52,13 +50,12 @@ const WasIt = ({ oldLines, newLines }) => {
             <table className="wasIt__table">
               <thead>
                 <tr>
-                  <th>Пункт</th>
+                  <th>Номер строки</th>
                   <th>Было</th>
                   <th>Стало</th>
                   <th>Статья закона</th>
                   <th>Риск</th>
                   <th>Рекомендация</th>
-                  <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -67,7 +64,7 @@ const WasIt = ({ oldLines, newLines }) => {
                   
                   return (
                     <tr key={idx}>
-                      <td>{row.пункт}</td>
+                      <td style={{ textAlign: 'center' }}>{row.номерСтроки}</td>
                       <td className="wasIt__text-cell wasIt__text-old">{row.было}</td>
                       <td className="wasIt__text-cell">{row.стало}</td>
                       <td>{row.статья}</td>
@@ -75,14 +72,6 @@ const WasIt = ({ oldLines, newLines }) => {
                         {riskInfo.label}
                       </td>
                       <td>{row.рекомендация}</td>
-                      <td>
-                        <button 
-                          className="details-button" 
-                          onClick={() => console.log("Инфо:", row.raw)}
-                        >
-                          Подробнее
-                        </button>
-                      </td>
                     </tr>
                   );
                 })}
