@@ -1,0 +1,179 @@
+:root {
+    --risk-purple: #8b5cf6;
+    --risk-purple-light: rgba(139, 92, 246, 0.1);
+    --hover-bg: #f1f5f9;
+    --border-color: #e2e8f0;
+}
+
+.compare_docs {
+    padding: 60px 0 100px 0;
+    background: #f8fafc;
+    min-height: 100vh;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.compare_docs__container {
+    max-width: 1400px; /* Расширяем для удобства работы с двумя текстами */
+    margin: 0 auto;
+}
+
+.compare_docs__title {
+    margin-bottom: 40px;
+    text-align: center;
+    font-weight: 850;
+    color: #0f172a;
+}
+
+.compare_docs__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Четкое деление 50/50 */
+    gap: 20px;
+    align-items: start;
+}
+
+/* Стилизация DocCard внутри сравнения */
+.doc-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+/* Стили строк (линий текста) */
+.doc-line {
+    padding: 8px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    margin: 2px 0;
+}
+
+/* Синхронизированная подсветка при наведении */
+.doc-line--hovered {
+    background-color: var(--hover-bg);
+    border-left-color: #cbd5e1;
+}
+
+/* Выделение измененных строк (purple из твоего кода) */
+.doc-line--purple {
+    background-color: var(--risk-purple-light);
+    border-left-color: var(--risk-purple);
+}
+
+.doc-line--purple:hover {
+    background-color: rgba(139, 92, 246, 0.2);
+}
+
+/* Модальное окно (Glassmorphism) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    padding: 32px;
+    border-radius: 24px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.modal-content h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: var(--risk-purple);
+    font-weight: 800;
+}
+
+.modal-content p {
+    margin-bottom: 16px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.modal-content strong {
+    color: #1e293b;
+}
+
+.modal-content a {
+    color: #0009FF;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.modal-content button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background: #f1f5f9;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-content button:hover {
+    background: #e2e8f0;
+}
+
+/* Анимации */
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.9) translateY(30px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Адаптив */
+@media (max-width: 1024px) {
+    .compare_docs__body {
+        grid-template-columns: 1fr; /* На планшетах в одну колонку */
+    }
+}
+
+.doc-card__line.red {
+  background-color: #ffe6e6;
+}
+.doc-card__line.yellow {
+  background-color: #fff3cd;
+}
+.doc-card__line.green {
+  background-color: #d4edda;
+}
+.doc-card__line.unchanged {
+  background-color: transparent;
+}
+
+/* Фиолетовое выделение для старой колонки */
+.doc-card__line--changed-old {
+    background-color: #f3e5f5 !important; /* Светло-фиолетовый */
+    border-left: 4px solid #9c27b0;       /* Насыщенная фиолетовая полоса */
+    color: #4a148c;                      /* Темно-фиолетовый текст */
+}
+
+/* На случай, если классы называются просто по типу */
+.changed-old {
+    background-color: #f3e5f5;
+}
