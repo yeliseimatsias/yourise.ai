@@ -152,3 +152,28 @@
         grid-template-columns: 1fr; /* На планшетах в одну колонку */
     }
 }
+
+.doc-card__line.red {
+  background-color: #ffe6e6;
+}
+.doc-card__line.yellow {
+  background-color: #fff3cd;
+}
+.doc-card__line.green {
+  background-color: #d4edda;
+}
+.doc-card__line.unchanged {
+  background-color: transparent;
+}
+
+/* Фиолетовое выделение для старой колонки */
+.doc-card__line--changed-old {
+    background-color: #f3e5f5 !important; /* Светло-фиолетовый */
+    border-left: 4px solid #9c27b0;       /* Насыщенная фиолетовая полоса */
+    color: #4a148c;                      /* Темно-фиолетовый текст */
+}
+
+/* На случай, если классы называются просто по типу */
+.changed-old {
+    background-color: #f3e5f5;
+}

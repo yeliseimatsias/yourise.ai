@@ -4,7 +4,8 @@ import { useFiles } from '../context/FileContext';
 import Header from '../layouts/Header';
 import Title from '../components/Title';
 import DocCard from '../components/DocCard';
-import { mockApiResponse } from '../mocks/mockApiResponse';
+import { MOCK_API_RESPONSE } from '../mocks/mockApiResponse';
+import { parseApiResponse } from '../utils/parseApiResponse';
 import "../styles/Comparison.css";
 import WasIt from '../components/WasIt';
 import RiskInfoButton from '../layouts/RiskInfo';
@@ -15,10 +16,11 @@ const Comparison = () => {
 
   const [oldLines, setOldLines] = useState([]);
   const [newLines, setNewLines] = useState([]);
+  const [changes, setChanges] = useState([]);
   const [loading, setLoading] = useState({ old: false, new: false });
   const [error, setError] = useState({ old: '', new: '' });
   const [selectedLine, setSelectedLine] = useState(null);
-  const [hoveredIndex, setHoveredIndex] = useState(null); // индекс строки, на которую наведён курсор
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     if (!oldFile || !newFile) {
@@ -26,40 +28,25 @@ const Comparison = () => {
     }
   }, [oldFile, newFile, navigate]);
 
-  // Симуляция загрузки старого файла (с фиолетовыми строками для изменённых)
   useEffect(() => {
-    if (!oldFile) return;
-    setLoading(prev => ({ ...prev, old: true }));
-    
-    // Создаём копию mockApiResponse, но заменяем текст на "старый" (для демо просто копируем текст)
-    // и для строк, которые в mockApiResponse имеют риск (т.е. изменены), ставим risk: 'purple'
-    const oldLinesData = mockApiResponse.map(item => {
-      // Если у элемента есть риск (не null), значит строка была изменена в новой версии
-      const isChanged = item.risk !== null;
-      return {
-        text: item.text, // В реальности здесь должен быть текст старого файла
-        type: isChanged ? 'purple' : 'unchanged',
-        risk: isChanged ? 'purple' : null,
-        recommendation: null,
-        article: null
-      };
-    });
+    if (!oldFile || !newFile) return;
+
+    setLoading({ old: true, new: true });
 
     setTimeout(() => {
-      setOldLines(oldLinesData);
-      setLoading(prev => ({ ...prev, old: false }));
+      try {
+        const parsed = parseApiResponse(MOCK_API_RESPONSE);
+        setOldLines(parsed.oldLines);
+        setNewLines(parsed.newLines);
+        setChanges(parsed.changes);
+        setLoading({ old: false, new: false });
+      } catch (err) {
+        console.error(err);
+        setError({ old: 'Ошибка загрузки', new: 'Ошибка загрузки' });
+        setLoading({ old: false, new: false });
+      }
     }, 500);
-  }, [oldFile]);
-
-  // Используем мок-данные для новой редакции
-  useEffect(() => {
-    if (!newFile) return;
-    setLoading(prev => ({ ...prev, new: true }));
-    setTimeout(() => {
-      setNewLines(mockApiResponse);
-      setLoading(prev => ({ ...prev, new: false }));
-    }, 500);
-  }, [newFile]);
+  }, [oldFile, newFile]);
 
   const handleLineClick = (line) => {
     setSelectedLine(line);
@@ -81,8 +68,8 @@ const Comparison = () => {
               file={oldFile}
               contentLines={oldLines}
               onLineClick={handleLineClick}
-              onLineHover={setHoveredIndex}   // передаём индекс при наведении
-              hoveredIndex={hoveredIndex}      // передаём текущий индекс для подсветки
+              onLineHover={setHoveredIndex}
+              hoveredIndex={hoveredIndex}
               loading={loading.old}
               error={error.old}
             />
@@ -99,26 +86,23 @@ const Comparison = () => {
           </div>
         </div>
       </section>
-      
-      <WasIt oldLines={oldLines} newLines={newLines} />
+
+      <WasIt changes={changes} />
       <RiskInfoButton />
 
-      {/* Модальное окно (без изменений) */}
       {selectedLine && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h3>Детали изменения</h3>
             <p><strong>Текст:</strong> {selectedLine.text}</p>
+            {selectedLine.explanation && (
+              <p><strong>Пояснение:</strong> {selectedLine.explanation}</p>
+            )}
             {selectedLine.recommendation && (
               <p><strong>Рекомендация:</strong> {selectedLine.recommendation}</p>
             )}
-            {selectedLine.article && (
-              <p>
-                <strong>Статья:</strong> {selectedLine.article.title} —{' '}
-                <a href={selectedLine.article.url} target="_blank" rel="noopener noreferrer">
-                  открыть
-                </a>
-              </p>
+            {selectedLine.elementNumber && (
+              <p><strong>Элемент:</strong> {selectedLine.elementNumber}</p>
             )}
             <button onClick={closeModal}>Закрыть</button>
           </div>
