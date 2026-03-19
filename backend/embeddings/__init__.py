@@ -2,4 +2,4 @@ from .chunker import LawDocumentChunker
 from .embedder import E5Embedder
 from .pipeline import AdminLawIngestionPipeline
 
-all = ["LawDocumentChunker", "E5Embedder", "AdminLawIngestionPipeline"]
+__all__ = ["LawDocumentChunker", "E5Embedder", "AdminLawIngestionPipeline"]

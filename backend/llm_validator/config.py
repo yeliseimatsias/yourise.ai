@@ -8,9 +8,9 @@ load_dotenv()
 
 @dataclass
 class Config:
-    deepseek_api_key: str = field(default_factory=lambda: os.getenv("DEEPSEEK_API_KEY", ""))
-    deepseek_base_url: str = "https://openrouter.ai/api/v1"
-    deepseek_model: str = "deepseek/deepseek-r1"
+    deepseek_api_key = os.getenv('GROQ_API_KEY', '')
+    deepseek_base_url = "https://api.groq.com/openai/v1"
+    deepseek_model = "llama-3.3-70b-versatile" 
 
     db_config: Dict[str, str] = field(default_factory=lambda: {
         'dbname': os.getenv('DB_NAME', 'lawyer_assistant'),

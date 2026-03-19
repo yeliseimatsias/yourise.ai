@@ -5,8 +5,8 @@ from psycopg2.extras import execute_values
 import numpy as np
 from typing import List, Dict, Any, Tuple
 
-from embeddings.chunker import LawDocumentChunker
-from embeddings.embedder import E5Embedder
+from backend.embeddings.chunker import LawDocumentChunker
+from backend.embeddings.embedder import E5Embedder
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +88,29 @@ class AdminLawIngestionPipeline:
             ))
 
             logger.info("Сохранение в laws.articles...")
-            execute_values(cursor, """
-                INSERT INTO laws.articles (id, law_id, article_number, article_title, content)
-                VALUES %s
-                ON CONFLICT (law_id, article_number) DO NOTHING
-            """, [(a["id"], a["law_id"], a["article_number"], a["article_title"], a["content"]) for a in articles])
+            for article in articles:
+                try:
+                    cursor.execute("""
+                        INSERT INTO laws.articles (id, law_id, article_number, article_title, content)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (law_id, article_number) DO UPDATE SET
+                            article_title = EXCLUDED.article_title,
+                            content = EXCLUDED.content
+                        RETURNING id
+                    """, (article["id"], article["law_id"], article["article_number"], 
+                        article["article_title"], article["content"]))
+                    
+                    real_id = cursor.fetchone()[0]
+                    logger.info(f"✅ Статья {article['article_number']} сохранена с ID: {real_id}")
+                    
+                    # Обновляем ID в chunks_info для этой статьи
+                    for chunk in chunks:
+                        if chunk["article_id"] == article["id"]:
+                            chunk["article_id"] = real_id
+                            
+                except Exception as e:
+                    logger.error(f"❌ Ошибка при сохранении статьи {article['article_number']}: {e}")
+                    raise
 
             logger.info("Сохранение в laws.chunks...")
             execute_values(cursor, """

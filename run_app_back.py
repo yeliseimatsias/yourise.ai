@@ -4,6 +4,7 @@ from typing import Dict, Any
 import json
 os.environ['HF_HOME'] = 'D:/huggingface_cache'
 import uuid
+import psycopg2
 
 # Импорты модулей парсинга
 from backend.parsers.factory import ParserFactory, UnsupportedFormatError
@@ -25,48 +26,64 @@ config = Config()
 # ==============================================================================
 # ФУНКЦИЯ 1: ПАЙПЛАЙН АДМИНИСТРАТОРА (Загрузка эталонов в БД)
 # ==============================================================================
-def admin_ingest_law(file_path: str, db_config: dict, law_metadata: dict) -> bool:
+def admin_ingest_law(file_path: str, db_config: dict) -> bool:
     """
-    Принимает файл (PDF/DOCX), парсит его, разбивает на чанки, генерирует векторы
-    через E5 и сохраняет в эталонную базу данных (схема laws).
-
-    :param file_path: Путь к файлу закона (например, 'documents/tk_rf.docx')
-    :param db_config: Словарь с настройками подключения к PostgreSQL
-    :param law_metadata: Данные о законе (law_reference, law_name, hierarchy_level)
+    Принимает файл, извлекает метаданные из его содержимого и сохраняет в БД.
     """
-    logger.info(f"Начало обработки эталонного документа: {file_path}")
+    logger.info(f"Начало обработки документа: {file_path}")
 
     try:
-        # 1. Получаем нужный парсер (PDF или DOCX) из Фабрики
+        # 1. Получаем парсер и сырые данные
         parser = ParserFactory.get_parser(file_path)
-
-        # 2. Парсим документ (вытаскиваем структуру, статьи, текст)
         parsed_data = parser.parse(file_path)
-        logger.info(f"Документ успешно распарсен. Найдено элементов: {len(parsed_data['elements'])}")
+        elements = parsed_data.get('elements', [])
 
-        # 3. Адаптируем распарсенные элементы под формат, который ждет AdminLawIngestionPipeline
+        if not elements:
+            logger.error("Парсер не нашел данных в файле.")
+            return False
+
+        # --- БЛОК АВТОМАТИЧЕСКОГО ИЗВЛЕЧЕНИЯ МЕТАДАННЫХ ---
+
+        # 2. Ищем заголовок (law_name)
+        # Проверяем первые 10 элементов: ищем строку в ВЕРХНЕМ РЕГИСТРЕ (как на скрине)
+        law_name = "Неизвестный документ"
+        for el in elements[:10]:
+            content = el.get('content', '').strip()
+            # Условие: длинный текст капсом или содержит ключевое слово 'РЕШЕНИЕ'
+            if len(content) > 20 and (content.isupper() or "РЕШЕНИЕ" in content.upper()):
+                law_name = content
+                break
+
+        # 3. Создаем law_reference (уникальный ключ для БД)
+        # Берем либо имя файла, либо первые 50 символов названия
+        law_ref = parsed_data.get('filename', 'ref_id').split('.')[0]
+
+        # 4. Определяем уровень иерархии (по умолчанию 1)
+        hierarchy_level = 1
+        # -------------------------------------------------
+
+        # 5. Собираем статьи (фильтруем только 'article' и 'clause' со скринов)
         articles_for_db = []
-        for index, el in enumerate(parsed_data['elements']):
-            # Если парсер не нашел номер статьи, даем ей порядковый номер
-            art_number = el.get('number') or str(index + 1)
+        for el in elements:
+            if el.get('type') not in ['article', 'clause']:
+                continue
 
             articles_for_db.append({
-                "number": art_number,
-                "title": el.get('title') or el.get('type', 'Раздел'),
+                "number": el.get('number') or "б/н",
+                "title": el.get('title') or (el.get('content', '')[:100] + "..."),
                 "content": el.get('content', '')
             })
 
-        # Формируем итоговый словарь документа
+        # Формируем итоговый объект
         document_to_ingest = {
-            "law_reference": law_metadata.get("law_reference", parsed_data['filename']),
-            "law_name": law_metadata.get("law_name", "Без названия"),
-            "hierarchy_level": law_metadata.get("hierarchy_level", 1),
-            "source_url": law_metadata.get("source_url", ""),
+            "law_reference": law_ref,
+            "law_name": law_name,
+            "hierarchy_level": hierarchy_level,
+            "source_url": "",  # Если ссылки нет в JSON, оставляем пустой
             "articles": articles_for_db
         }
 
-        # 4. Прогоняем через пайплайн эмбеддингов и БД
-        # ВАЖНО: Убедитесь, что в pipeline.py строка `self._save_to_db(...)` раскомментирована!
+        # 6. Прогоняем через пайплайн
         pipeline = AdminLawIngestionPipeline(db_config=db_config)
         chunks, embeddings = pipeline.run(document_to_ingest)
 
@@ -89,6 +106,26 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
     logger.info(f"--- ПОЛЬЗОВАТЕЛЬ: Сравнение {old_file} и {new_file} ---")
     session_id = str(uuid.uuid4())
 
+     # ✅ СОЗДАЁМ СЕССИЮ В БД
+    try:
+        with psycopg2.connect(**config.db_config) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO core.sessions (id, status, progress, changes_total, changes_processed)
+                    VALUES (%s, 'processing', 0, 0, 0)
+                    ON CONFLICT (id) DO NOTHING
+                    RETURNING id
+                """, (session_id,))
+                saved = cur.fetchone()
+                if saved:
+                    logger.info(f"✅ Сессия {saved[0]} создана")
+                else:
+                    logger.warning(f"⚠️ Сессия {session_id} уже существовала")
+                conn.commit()
+    except Exception as e:
+        logger.error(f"❌ Не удалось создать сессию: {e}")
+        return {"error": str(e)}
+    
     try:
         # 1. Парсинг файлов
         old_doc = ParserFactory.get_parser(old_file).parse(old_file)
@@ -118,6 +155,24 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
                     "document_type": "contract",
                     "document_level": 1
                 }
+
+                # Сохраняем change в БД
+                with psycopg2.connect(**config.db_config) as conn:
+                    with conn.cursor() as cur:
+                        cur.execute("""
+                            INSERT INTO core.changes 
+                            (id, session_id, element_number, change_type, old_text, new_text, processing_status)
+                            VALUES (%s, %s, %s, %s, %s, %s, 'pending')
+                            ON CONFLICT (id) DO NOTHING
+                        """, (
+                            llm_payload["change_id"],
+                            session_id,
+                            llm_payload["element_number"],
+                            llm_payload["type"],
+                            llm_payload["old_text"],
+                            llm_payload["new_text"]
+                        ))
+                        conn.commit()
 
                 # Запрос к DeepSeek (Поиск в БД -> Промпт -> Ответ)
                 val_res_str = llm_pipeline.process_change_to_json(llm_payload)
@@ -150,6 +205,8 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
 
         # Финальный JSON для UI
         final_json = report_gen.generate_json_report()
+        with open(f'report_{session_id}.json', 'w', encoding = 'utf-8') as f:
+            json.dump(final_json, f, ensure_ascii=False, indent = 4)
 
         # Финальный DOCX файл
         docx_data = report_gen.generate_docx_report()
@@ -166,5 +223,30 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
         logger.error(f"❌ Ошибка пользовательского пайплайна: {e}")
         return {"error": str(e)}
 
+def test_load_law():
+    """Тестовая загрузка закона"""
+    file_path = r"C:\Users\Lenovo\Downloads\H11300016_1357765200.pdf"
+    
+    logger.info("🚀 Начинаем загрузку закона...")
+    
+    result = admin_ingest_law(
+        file_path=file_path,
+        db_config=config.db_config
+    )
+    
+    if result:
+        logger.info("✅ Закон успешно загружен!")
+        
+        # Проверяем, сколько статей загрузилось
+        with psycopg2.connect(**config.db_config) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM laws.articles")
+                articles_count = cur.fetchone()[0]
+                logger.info(f"📊 Статей в БД: {articles_count}")
+    else:
+        logger.error("❌ Ошибка загрузки закона")
+
+
 if __name__ == "__main__":
-    admin_ingest_law(r"C:/Users/Lenovo/Downloads/H11300016_1357765200.pdf")
+    user_process_comparison(old_file=r"C:\Users\Lenovo\Downloads\old_test.docx", new_file=r"C:\Users\Lenovo\Downloads\new_test.docx")
+    # test_load_law()

@@ -2,6 +2,8 @@ import logging
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from typing import List, Dict, Any
+from pgvector.psycopg2 import register_vector
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +36,16 @@ class ValidatorRepository:
                 "similarity": 0.99
             }]
 
-        # Реальный поиск в БД (если она есть)
-        vector_str = '[' + ','.join(map(str, embedding)) + ']'
+        if not embedding:
+            logger.warning("Получен пустой эмбеддинг, поиск по БД отменен.")
+            return []
+
+        # 1. Сериализуем список в строку. json.dumps делает это идеально,
+        # не ломая числа с плавающей точкой.
+        vector_str = json.dumps(embedding)
+
+        # 2. Явно кастуем строку в вектор через ::vector
+        # PostgreSQL отлично умеет парсить строки вида "[0.1, 0.2]" в свой тип vector.
         query = """
             SELECT 
                 c.original_reference as law_reference,
@@ -49,11 +59,17 @@ class ValidatorRepository:
             ORDER BY e.embedding <=> %s::vector
             LIMIT %s;
         """
-        with self._get_connection() as conn:
-            with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute(query, (vector_str, vector_str, limit))
-                return [dict(row) for row in cur.fetchall()]
-
+        
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    # 3. Передаем нашу строку vector_str два раза
+                    cur.execute(query, (vector_str, vector_str, limit))
+                    return [dict(row) for row in cur.fetchall()]
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении векторного поиска в БД: {e}")
+            return []
+    
     def save_validation_result(self, change_id: str, result: dict):
         """Сохраняет результаты в БД или игнорирует в Mock-режиме."""
         if self.use_mock:
