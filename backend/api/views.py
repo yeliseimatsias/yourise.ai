@@ -3,6 +3,7 @@ from django.http import JsonResponse, FileResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+from core.models import Session
 # Импорт вашей главной функции сравнения (лежит в корне backend)
 from run_app_back import user_process_comparison
 
@@ -43,6 +44,21 @@ def compare_documents(request):
         if os.path.exists(new_path):
             os.remove(new_path)
 
+
+# @csrf_exempt
+# def get_status(request, session_id):
+#     """Возвращает статус обработки сессии."""
+#     try:
+#         session = Session.objects.get(pk=session_id)
+#         data = {
+#             'session_id': str(session.id),
+#             'status': session.status,
+#             'progress': session.progress,
+#             'error': session.error_message if session.status == 'failed' else None,
+#         }
+#         return JsonResponse(data)
+#     except Session.DoesNotExist:
+#         return JsonResponse({'error': 'Сессия не найдена'}, status=404)
 
 @csrf_exempt
 def download_report(request, filename):

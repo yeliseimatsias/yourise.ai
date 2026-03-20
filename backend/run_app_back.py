@@ -106,7 +106,7 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
     logger.info(f"--- ПОЛЬЗОВАТЕЛЬ: Сравнение {old_file} и {new_file} ---")
     session_id = str(uuid.uuid4())
 
-     # ✅ СОЗДАЁМ СЕССИЮ В БД
+    # ✅ СОЗДАЁМ СЕССИЮ В БД
     try:
         with psycopg2.connect(**config.db_config) as conn:
             with conn.cursor() as cur:
@@ -139,7 +139,13 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
         llm_pipeline = LLMValidatorPipeline(config=config)
 
         validated_changes = []
+        
+        # Логируем для отладки
+        logger.info(f"📊 Найдено изменений: {len(diff_results.get('changes', []))}")
+        
         for change in diff_results.get("changes", []):
+            logger.debug(f"🔍 Обработка изменения типа: {change.get('type')}, номер: {change.get('element_number')}")
+            
             # Проверяем только то, что изменилось или добавилось
             if change['type'] in ['modified', 'added', 'moved_and_modified']:
 
@@ -159,15 +165,29 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
                 # Сохраняем change в БД
                 with psycopg2.connect(**config.db_config) as conn:
                     with conn.cursor() as cur:
+                        # Определяем, что писать в element_number и old_number
+                        if change['type'] == 'added':
+                            element_num = change.get('element_number') or change.get('new_number') or "—"
+                            old_num = None
+                        elif change['type'] == 'deleted':
+                            element_num = change.get('element_number') or "—"
+                            old_num = change.get('element_number')
+                        elif change['type'] in ['modified', 'moved', 'moved_and_modified']:
+                            element_num = change.get('element_number') or change.get('new_number') or "—"
+                            old_num = change.get('old_number')
+                        else:
+                            element_num = change.get('element_number') or "—"
+                            old_num = None
+                        
                         cur.execute("""
                             INSERT INTO core.changes 
-                            (id, session_id, element_number, change_type, old_text, new_text, processing_status)
-                            VALUES (%s, %s, %s, %s, %s, %s, 'pending')
-                            ON CONFLICT (id) DO NOTHING
+                            (id, session_id, element_number, old_number, change_type, old_text, new_text, processing_status)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending')
                         """, (
                             llm_payload["change_id"],
                             session_id,
-                            llm_payload["element_number"],
+                            element_num,
+                            old_num,
                             llm_payload["type"],
                             llm_payload["old_text"],
                             llm_payload["new_text"]
@@ -181,6 +201,7 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
                 # Собираем данные для генератора отчета
                 validated_changes.append({
                     **llm_payload,
+                    "old_number": change.get('old_number'),  # ← СТАРЫЙ НОМЕР
                     "overall_risk": val_res.get("overall_risk", "green"),
                     "overall_explanation": val_res.get("overall_explanation", ""),
                     "validation_results": val_res.get("validation_results", [])
@@ -188,7 +209,10 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
             else:
                 # Для удаленных или перемещенных без изменений — просто добавляем в список
                 validated_changes.append({
+                    "change_id": change.get('id'),
                     "change_type": change['type'],
+                    "element_number": change.get('element_number') or change.get('new_number') or "—",
+                    "old_number": change.get('old_number'),  # ← СТАРЫЙ НОМЕР
                     "old_text": change.get('old_element', {}).get('content', ""),
                     "new_text": change.get('new_element', {}).get('content', ""),
                     "overall_risk": "green"
@@ -197,16 +221,16 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
         # 4. Генерация отчетов
         session_info = {
             "id": session_id,
-            "old_document": old_file,
-            "new_document": new_file
+            "old_document": os.path.basename(old_file),  # только имя файла
+            "new_document": os.path.basename(new_file)   # только имя файла
         }
 
         report_gen = ReportGenerator(session_info, validated_changes)
 
         # Финальный JSON для UI
         final_json = report_gen.generate_json_report()
-        with open(f'report_{session_id}.json', 'w', encoding = 'utf-8') as f:
-            json.dump(final_json, f, ensure_ascii=False, indent = 4)
+        with open(f'report_{session_id}.json', 'w', encoding='utf-8') as f:
+            json.dump(final_json, f, ensure_ascii=False, indent=4)
 
         # Финальный DOCX файл
         docx_data = report_gen.generate_docx_report()
@@ -217,7 +241,11 @@ def user_process_comparison(old_file: str, new_file: str) -> Dict[str, Any]:
         final_json["docx_report_path"] = docx_path
         logger.info(f"✅ Обработка завершена. Файл отчета: {docx_path}")
 
-        return final_json
+        return {
+            "old_document": old_doc,        # распаршенный старый документ
+            "new_document": new_doc,        # распаршенный новый документ
+            "analysis": final_json           # результаты анализа
+        }
 
     except Exception as e:
         logger.error(f"❌ Ошибка пользовательского пайплайна: {e}")

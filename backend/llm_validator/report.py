@@ -34,7 +34,7 @@ class ReportGenerator:
 
     def generate_json_report(self) -> dict:
         """Формирует структурированный JSON для UI."""
-        session_id = self.session.get("id", "unknown_session")  # Достаем ID сессии
+        session_id = self.session.get("id", "unknown_session")
 
         report = {
             "session_id": session_id,
@@ -47,8 +47,6 @@ class ReportGenerator:
                 "stats": self.stats,
             },
             "changes_by_risk": {"red": [], "yellow": [], "green": []},
-
-            # --- ДОБАВЛЕННЫЙ БЛОК СО ССЫЛКАМИ ---
             "download_links": {
                 "json": f"/api/reports/{session_id}/json",
                 "docx": f"/api/reports/{session_id}/docx"
@@ -62,9 +60,11 @@ class ReportGenerator:
             validations = change.get("validation_results", [])
             validation = validations[0] if validations else {}
 
+            # 🔥 ДОБАВЛЯЕМ old_number
             entry = {
                 "change_id": change.get("change_id"),
-                "number": change.get("element_number", "—"),
+                "number": change.get("element_number", "—"),           # новый номер
+                "old_number": change.get("old_number"),                # старый номер (может быть None)
                 "type": change.get("change_type", "modified"),
                 "old_text": change.get("old_text", "—"),
                 "new_text": change.get("new_text", "—"),
@@ -90,7 +90,13 @@ class ReportGenerator:
         run.font.color.rgb = color_rgb
 
         for item in changes:
-            doc.add_heading(f"Пункт {item['number']} ({item['type']})", level=2)
+            # 🔥 Добавляем отображение старого номера в заголовок
+            if item.get('old_number') and item['old_number'] != item['number']:
+                display_number = f"{item['old_number']} → {item['number']}"
+            else:
+                display_number = item['number']
+
+            doc.add_heading(f"Пункт {display_number} ({item['type']})", level=2)
 
             # Таблица сравнения текста
             table = doc.add_table(rows=1, cols=2)
@@ -158,55 +164,3 @@ class ReportGenerator:
         doc.save(target_stream)
         target_stream.seek(0)
         return target_stream
-
-
-# --- ПРИМЕР ИСПОЛЬЗОВАНИЯ ---
-if __name__ == "__main__":
-    # Метаданные сессии
-    session_info = {
-        "id": "550e8400-e29b-41d4-a716-446655440000",
-        "old_document": "Трудовой_договор_2025.docx",
-        "new_document": "Трудовой_договор_2026.docx"
-    }
-
-    # Массив изменений (Склеенные данные фронтенда + ответ от новой LLM)
-    changes_data = [
-        {
-            # Данные об изменении (были у нас изначально)
-            "change_id": "550e8400-e29b-41d4-a716-446655440000",
-            "element_number": "5.3",
-            "change_type": "modified",
-            "old_text": "Работник имеет право на отпуск 24 дня.",
-            "new_text": "Работнику предоставляется отпуск 21 день.",
-
-            # Данные из новой LLM модели (то, что вы прислали)
-            "overall_risk": "red",
-            "overall_explanation": "Найдено 1 критических нарушений.",
-            "validation_results": [
-                {
-                    "law_reference": "Трудовой кодекс РБ, ст. 155 (MOCK)",
-                    "law_text": "Основной отпуск предоставляется продолжительностью не менее 24 календарных дней.",
-                    "contradiction_type": "direct",
-                    "is_contradiction": True,
-                    "confidence": 0.95,
-                    "explanation": "Сокращение продолжительности основного отпуска с 24 до 21 дня напрямую нарушает установленный Трудовым кодексом РБ минимальный срок в 24 календарных дня.",
-                    "quote_from_law": "Основной отпуск предоставляется продолжительностью не менее 24 календарных дней.",
-                    "suggestion": "Восстановить минимальную продолжительность отпуска до 24 календарных дней в соответствии с требованиями ст. 155 ТК РБ",
-                    "severity": "high"
-                }
-            ]
-        }
-    ]
-
-    # Инициализация и генерация
-    generator = ReportGenerator(session_info, changes_data)
-
-    # Сохраняем DOCX
-    docx_file = generator.generate_docx_report()
-    with open("legal_report_full.docx", "wb") as f:
-        f.write(docx_file.read())
-    print("✅ Отчет legal_report_full.docx успешно создан.")
-
-    # Посмотреть JSON структуру
-    print("\n✅ Сгенерированный JSON для фронтенда:")
-    print(json.dumps(generator.generate_json_report(), ensure_ascii=False, indent=2))
