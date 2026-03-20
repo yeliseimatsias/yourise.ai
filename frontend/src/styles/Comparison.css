@@ -53,6 +53,13 @@
     margin: 2px 0;
 }
 
+.doc-card {
+    height: 100%;
+    max-height: 68vh;
+    padding: 20px;
+    overflow-y: auto;
+}
+
 /* Синхронизированная подсветка при наведении */
 .doc-line--hovered {
     background-color: var(--hover-bg);
@@ -148,4 +155,20 @@
   0% { box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
   50% { box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6); }
   100% { box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+}
+
+.doc-line--red {
+  background-color: #ffe6e6 !important;
+  border-left: 4px solid #d32f2f !important;
+}
+.doc-line--yellow {
+  background-color: #fff3cd !important;
+  border-left: 4px solid #ed6c02 !important;
+}
+.doc-line--green {
+  background-color: #d4edda !important;
+  border-left: 4px solid #2e7d32 !important;
+}
+.doc-line--hovered {
+  background-color: #f1f5f9 !important;
 }

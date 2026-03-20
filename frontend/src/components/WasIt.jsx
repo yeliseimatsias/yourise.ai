@@ -1,11 +1,14 @@
 import Title from "../components/Title";
 import "../styles/WasIt.css";
 
-const WasIt = ({ changes }) => {
+const WasIt = ({ changes, onRowClick }) => {
   const riskMap = {
     red: { label: "КРАСНЫЙ", class: "risk-red" },
     yellow: { label: "ЖЁЛТЫЙ", class: "risk-yellow" },
     green: { label: "ЗЕЛЁНЫЙ", class: "risk-green" },
+    high: { label: "КРАСНЫЙ", class: "risk-red" },
+    medium: { label: "ЖЁЛТЫЙ", class: "risk-yellow" },
+    low: { label: "ЗЕЛЁНЫЙ", class: "risk-green" },
   };
 
   if (!changes || changes.length === 0) {
@@ -17,6 +20,10 @@ const WasIt = ({ changes }) => {
       </section>
     );
   }
+
+  const handleRowClick = (change) => {
+    if (onRowClick) onRowClick(change);
+  };
 
   return (
     <section className="wasIt">
@@ -36,9 +43,14 @@ const WasIt = ({ changes }) => {
             </thead>
             <tbody>
               {changes.map((row, idx) => {
-                const riskInfo = riskMap[row.riskKey] || { label: "—", class: "" };
+                const safeRiskKey = (row.risk || "").toLowerCase();
+                const riskInfo = riskMap[safeRiskKey] || { label: "—", class: "" };
                 return (
-                  <tr key={idx}>
+                  <tr
+                    key={row.change_id || idx}
+                    onClick={() => handleRowClick(row)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <td className="wasIt__cell-center">{idx + 1}</td>
                     <td className="wasIt__text-cell wasIt__text-old">{row.oldText}</td>
                     <td className="wasIt__text-cell">{row.newText}</td>

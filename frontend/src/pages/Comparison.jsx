@@ -12,21 +12,19 @@ import LineDetailsModal from '../components/LineDetailsModal';
 
 const Comparison = () => {
   const navigate = useNavigate();
-  const { oldFile, newFile, analysisData } = useFiles();
+  const { oldFile, newFile, analysisData, setDownloadLinks } = useFiles();
 
   const [oldLines, setOldLines] = useState([]);
   const [newLines, setNewLines] = useState([]);
   const [changes, setChanges] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLine, setSelectedLine] = useState(null);
+  const [selectedChange, setSelectedChange] = useState(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
-  // ref и состояние для кнопки прокрутки
   const tableRef = useRef(null);
   const [isTableVisible, setIsTableVisible] = useState(false);
 
   useEffect(() => {
-    // Если данных нет (например, обновили страницу F5), возвращаем на загрузку
     if (!analysisData) {
       navigate('/');
       return;
@@ -34,26 +32,30 @@ const Comparison = () => {
 
     setLoading(true);
     try {
-      const [oldDocJson, newDocJson, analysisJson] = analysisData;
+      const oldDoc = analysisData.old_document;
+      const newDoc = analysisData.new_document;
+      const analysis = analysisData.analysis;
 
-      // Собираем в структуру для парсера
       const result = parseApiResponse({
-        old_document: oldDocJson,
-        new_document: newDocJson,
-        analysis: analysisJson
+        old_document: oldDoc,
+        new_document: newDoc,
+        analysis: analysis,
       });
-      
+
       setOldLines(result.oldLines);
       setNewLines(result.newLines);
       setChanges(result.changes || []);
+
+      if (result.downloadLinks && setDownloadLinks) {
+        setDownloadLinks(result.downloadLinks);
+      }
     } catch (err) {
       console.error("Ошибка парсинга данных:", err);
     } finally {
       setLoading(false);
     }
-  }, [analysisData, navigate]);
+  }, [analysisData, navigate, setDownloadLinks]);
 
-  // Отслеживание видимости таблицы
   useEffect(() => {
     const handleScroll = () => {
       if (tableRef.current) {
@@ -63,7 +65,7 @@ const Comparison = () => {
       }
     };
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // проверить сразу
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -75,9 +77,58 @@ const Comparison = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLineClick = (line) => {
-    if (line.text && line.text.trim()) setSelectedLine(line);
+  /// Поиск изменения для старой строки (фиолетовый цвет)
+const findChangeForOldLine = (line) => {
+  // 1. Если есть номер, ищем по номеру
+  if (line.number) {
+    let change = changes.find(c => c.old_number === line.number);
+    if (change) return change;
+    change = changes.find(c => c.type === 'deleted' && c.number === line.number);
+    if (change) return change;
+    change = changes.find(c => c.type === 'modified' && c.number === line.number);
+    if (change) return change;
+    change = changes.find(c => c.number === line.number && c.type !== 'added');
+    if (change) return change;
+  }
+
+  // 2. Если номера нет, ищем по тексту (oldText)
+  const trimmedText = line.text.trim();
+  const changeByText = changes.find(c => c.oldText && c.oldText.trim() === trimmedText);
+  if (changeByText) return changeByText;
+
+  return null;
+};
+
+// Поиск изменения для новой строки (цвет по риску)
+const findChangeForNewLine = (line) => {
+  if (line.number) {
+    let change = changes.find(c => c.number === line.number);
+    if (change) return change;
+    change = changes.find(c => c.type === 'moved' && c.old_number === line.number);
+    if (change) return change;
+  } else {
+    // Если номера нет, ищем по тексту (newText)
+    const trimmedText = line.text.trim();
+    const changeByText = changes.find(c => c.newText && c.newText.trim() === trimmedText);
+    if (changeByText) return changeByText;
+  }
+  return null;
+};
+  const handleLineClick = (line, change) => {
+    if (change) {
+      setSelectedChange(change);
+    } else if (line.text && line.text.trim()) {
+      setSelectedChange({
+        ...line,
+        risk: 'default',
+        oldText: line.text,
+        newText: line.text,
+        explanation: 'Нет деталей анализа',
+      });
+    }
   };
+
+  const closeModal = () => setSelectedChange(null);
 
   if (!oldFile || !newFile) return null;
 
@@ -92,7 +143,9 @@ const Comparison = () => {
               title="Старая редакция"
               file={oldFile}
               contentLines={oldLines}
-              onLineClick={handleLineClick}
+              onLineClick={(line) => handleLineClick(line, findChangeForOldLine(line))}
+              getChangeForLine={findChangeForOldLine}
+              styleMode="old"
               onLineHover={setHoveredIndex}
               hoveredIndex={hoveredIndex}
               loading={loading}
@@ -101,7 +154,9 @@ const Comparison = () => {
               title="Новая редакция"
               file={newFile}
               contentLines={newLines}
-              onLineClick={handleLineClick}
+              onLineClick={(line) => handleLineClick(line, findChangeForNewLine(line))}
+              getChangeForLine={findChangeForNewLine}
+              styleMode="new"
               onLineHover={setHoveredIndex}
               hoveredIndex={hoveredIndex}
               loading={loading}
@@ -110,18 +165,12 @@ const Comparison = () => {
         </div>
       </section>
 
-      {/* Оборачиваем WasIt в реф, чтобы отслеживать его положение */}
       <div ref={tableRef}>
-        <WasIt changes={changes} />
+        <WasIt changes={changes} onRowClick={setSelectedChange} />
       </div>
 
       <RiskInfoButton />
-      <LineDetailsModal 
-        line={selectedLine} 
-        onClose={() => setSelectedLine(null)} 
-      />
 
-      {/* Кнопка прокрутки */}
       <button
         className={`scroll-button ${isTableVisible ? 'up' : 'down'}`}
         onClick={isTableVisible ? scrollToTop : scrollToTable}
@@ -130,10 +179,9 @@ const Comparison = () => {
         {isTableVisible ? '↑' : '↓'}
       </button>
 
-      {selectedLine && (
-        <LineDetailsModal line={selectedLine} onClose={closeModal} />
+      {selectedChange && (
+        <LineDetailsModal line={selectedChange} onClose={closeModal} />
       )}
-
     </>
   );
 };
