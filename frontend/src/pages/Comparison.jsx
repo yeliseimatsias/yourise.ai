@@ -10,9 +10,11 @@ import WasIt from '../components/WasIt';
 import RiskInfoButton from '../layouts/RiskInfo';
 import LineDetailsModal from '../components/LineDetailsModal';
 
+
 const Comparison = () => {
   const navigate = useNavigate();
   const { oldFile, newFile, analysisData, setDownloadLinks } = useFiles();
+  
 
   const [oldLines, setOldLines] = useState([]);
   const [newLines, setNewLines] = useState([]);
@@ -41,7 +43,9 @@ const Comparison = () => {
         new_document: newDoc,
         analysis: analysis,
       });
-
+      if (result.downloadLinks && setDownloadLinks) {
+        setDownloadLinks(result.downloadLinks);
+      }
       setOldLines(result.oldLines);
       setNewLines(result.newLines);
       setChanges(result.changes || []);

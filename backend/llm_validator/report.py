@@ -48,8 +48,8 @@ class ReportGenerator:
             },
             "changes_by_risk": {"red": [], "yellow": [], "green": []},
             "download_links": {
-                "json": f"/api/reports/{session_id}/json",
-                "docx": f"/api/reports/{session_id}/docx"
+                "json": f"{session_id}/json",
+                "docx": f"{session_id}/docx"
             }
         }
 
