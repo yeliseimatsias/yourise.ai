@@ -68,9 +68,6 @@
 .doc-line--purple:hover {
     background-color: rgba(139, 92, 246, 0.2);
 }
-
-
-
 /* Анимации */
 @keyframes modalPop {
     from { opacity: 0; transform: scale(0.9) translateY(30px); }
@@ -112,4 +109,43 @@
 /* На случай, если классы называются просто по типу */
 .changed-old {
     background-color: #f3e5f5;
+}
+
+.scroll-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: gentlePulse 2s infinite ease-in-out;
+}
+
+.scroll-button:hover {
+  transform: scale(1.1);
+  background-color: #0471e6;
+  animation: none; /* останавливаем пульсацию при наведении */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-button:active {
+  transform: scale(0.95);
+}
+
+/* Мягкая пульсация тени */
+@keyframes gentlePulse {
+  0% { box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 8px 20px rgba(59, 130, 246, 0.6); }
+  100% { box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
 }

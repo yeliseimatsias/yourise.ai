@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useFiles } from '../context/FileContext';
 import Header from '../layouts/Header';
 import Title from '../components/Title';
@@ -20,6 +20,10 @@ const Comparison = () => {
   const [loading, setLoading] = useState(false);
   const [selectedLine, setSelectedLine] = useState(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  // ref и состояние для кнопки прокрутки
+  const tableRef = useRef(null);
+  const [isTableVisible, setIsTableVisible] = useState(false);
 
   useEffect(() => {
     // Если данных нет (например, обновили страницу F5), возвращаем на загрузку
@@ -48,6 +52,28 @@ const Comparison = () => {
       setLoading(false);
     }
   }, [analysisData, navigate]);
+
+  // Отслеживание видимости таблицы
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tableRef.current) {
+        const rect = tableRef.current.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        setIsTableVisible(isVisible);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // проверить сразу
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTable = () => {
+    tableRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleLineClick = (line) => {
     if (line.text && line.text.trim()) setSelectedLine(line);
@@ -84,13 +110,30 @@ const Comparison = () => {
         </div>
       </section>
 
-      <WasIt changes={changes} />
+      {/* Оборачиваем WasIt в реф, чтобы отслеживать его положение */}
+      <div ref={tableRef}>
+        <WasIt changes={changes} />
+      </div>
+
       <RiskInfoButton />
-      
       <LineDetailsModal 
         line={selectedLine} 
         onClose={() => setSelectedLine(null)} 
       />
+
+      {/* Кнопка прокрутки */}
+      <button
+        className={`scroll-button ${isTableVisible ? 'up' : 'down'}`}
+        onClick={isTableVisible ? scrollToTop : scrollToTable}
+        aria-label={isTableVisible ? 'Наверх' : 'К таблице'}
+      >
+        {isTableVisible ? '↑' : '↓'}
+      </button>
+
+      {selectedLine && (
+        <LineDetailsModal line={selectedLine} onClose={closeModal} />
+      )}
+
     </>
   );
 };
